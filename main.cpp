@@ -28,7 +28,7 @@ void Page1(QStackedWidget* stack_widget);
 void ConnectDB(const QString& path_db);
 void GoPage2(QStackedWidget* stack_widget);
 void Page2(QStackedWidget* stack_widget);
-void ClikeButtonDB(QPushButton* button_db);
+void GetRows(QPushButton* button_db);
 //void Page3(QStackedWidget* stack_widget);
 int main(int argc, char *argv[])
 {
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
     QWidget* page_1=new QWidget();
     QWidget* page_2=new QWidget();
     QWidget* page_3=new QWidget();
-    QLabel* lol = new QLabel(page_3);
-    lol->setText("LO{");
+//    QLabel* lol = new QLabel(page_3);
+//    lol->setText("LO{");
 
     stack_widget->addWidget(page_1);
     stack_widget->addWidget(page_2);
@@ -155,23 +155,45 @@ void Page2(QStackedWidget* stack_widget)
 
     for(QPushButton* button_db : list_button){
         QObject::connect(button_db, &QPushButton::clicked, [button_db](){
-            ClikeButtonDB(button_db);
+            GetRows(button_db);
         });
     }
 }
 
-void ClikeButtonDB(QPushButton* button_db){
+void GetRows(QPushButton* button_db){
     QString name_table=button_db->text();
-    call_message_HS.CallMessage(name_table);
 
     QVector<QString> columns_title=connect_db.GetColumnsTitle(name_table);
-    QString lamfa;
-    for(QString title : columns_title){
-        lamfa+=title + " | ";
-    }
-    call_message_HS.CallMessage(lamfa);
+    int size_columns_title = columns_title.length();
 
+    QVector<QString> list_rows = connect_db.GetElementDB(name_table, columns_title);
+    int size_list_rows = list_rows.length();
+
+        QString lsdsodso;
+        int count_title=0;
+        for(int i=0; i<size_list_rows; i++){
+            count_title++;
+            lsdsodso+=list_rows[i]+", ";
+            if(count_title==size_columns_title){
+                lsdsodso+="\n***\n";
+                count_title=0;
+            }
+        }
+        call_message_HS.CallMessage(lsdsodso);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -43,26 +43,108 @@ QStringList AssemblyDB::GetTablesName() const
 
 QVector<QString> AssemblyDB::GetColumnsTitle(const QString& name_table)
 {
-    QSqlQuery query;
-    QString query_sql=QString("PRAGMA table_info(%1)").arg(name_table);
-//    query.prepare("PRAGMA table_info(?)");
-//    query.addBindValue(name_table);
+    QVector<QString> list_columns_title;
 
-    QVector<QString> columns_title;
+    if(!db_lite.isOpen()){
+        qDebug() << "Error: database is NOT open";
+        return {};
+    }
 
-    if(!db_lite.tables().contains(name_table)) {
+    if(!db_lite.tables().contains(name_table))
+    {
         qDebug() << "Table: " << name_table << " not found";
         return {};
     }
 
-    if(query.exec(query_sql)){
-        while(query.next()){
-            columns_title.append(query.value("name").toString());
+    QSqlQuery query(db_lite);
+    QString query_sql=QString("PRAGMA table_info(\"%1\")").arg(name_table);
+    if(query.exec(query_sql))
+    {
+        while(query.next())
+        {
+            list_columns_title.append(query.value("name").toString());
         }
     }
+    else
+    {
+        qDebug() << "Error open db: " << query.lastError().text();
+    }
 
-    return columns_title;
+
+    return list_columns_title;
 }
+
+QVector<QString> AssemblyDB::GetElementDB(QString& name_table, QVector<QString>& list_column_title)
+{
+    QVector<QString> list_rows_db;
+
+    QSqlQuery query(db_lite);
+    QString str_query = QString("SELECT * FROM %1").arg(name_table);
+    if(query.exec(str_query))
+    {
+        while(query.next())
+        {
+            for(QString name_title : list_column_title)
+            {
+                list_rows_db.append(query.value(name_title).toString());
+            }
+        }
+    }
+    else
+    {
+        qDebug() << "Error open db: " << query.lastError().text();
+    }
+
+
+    return list_rows_db;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -17,9 +17,11 @@ private:
     CallMessageHS call_message_HS;
 
 public:
+//    AssemblyDB() : query(db_lite){}
     bool ConnectAssemblyDB(const QString &path_db);
     QStringList GetTablesName() const;
     QVector<QString> GetColumnsTitle(const QString& name_table);
+    QVector<QString> GetElementDB(QString& name_table, QVector<QString>& list_column_title);
 };
 
 #endif // ASSEMBLYDB_H
