@@ -74,19 +74,33 @@ QVector<QString> AssemblyDB::GetColumnsTitle(const QString& name_table)
     return list_columns_title;
 }
 
-QVector<QString> AssemblyDB::GetElementDB(QString& name_table, QVector<QString>& list_column_title)
+QVector<QVector<QString>> AssemblyDB::GetElementTable(QString& name_table, const QVector<QString>& list_column_title)
 {
-    QVector<QString> list_rows_db;
+    QVector<QVector<QString>> matrix_rows_table;
+    QVector<QString> list_rows_table;
+    int size_title = list_column_title.length();
 
     QSqlQuery query(db_lite);
     QString str_query = QString("SELECT * FROM %1").arg(name_table);
     if(query.exec(str_query))
     {
+        int count_title=0;
         while(query.next())
         {
             for(QString name_title : list_column_title)
             {
-                list_rows_db.append(query.value(name_title).toString());
+                count_title++;
+                if(count_title>=size_title)
+                {
+                    qDebug() << list_rows_table;
+                    matrix_rows_table.append(list_rows_table);
+                    count_title=0;
+                    list_rows_table={};
+                }
+                else
+                {
+                    list_rows_table.append(query.value(name_title).toString());
+                }
             }
         }
     }
@@ -95,10 +109,39 @@ QVector<QString> AssemblyDB::GetElementDB(QString& name_table, QVector<QString>&
         qDebug() << "Error open db: " << query.lastError().text();
     }
 
-
-    return list_rows_db;
+    return matrix_rows_table;
 }
 
+bool AssemblyDB::CheckAutoincrement(const QString& name_table, const QString& title_column)
+{
+    QSqlQuery query(db_lite);
+
+    QString str_query = QString("PRAGMA table_info(%1);").arg(name_table);
+    int is_pk;
+    QString title_column_iteration;
+    if(query.exec(str_query))
+    {
+        while(query.next())
+        {
+            qDebug() << "0_0";
+            QString title_column_iteration = query.value(1).toString();  //name column
+            is_pk = query.value(5).toInt();  // check primary key
+            qDebug() << title_column_iteration << ";;;" << is_pk;
+            if(title_column_iteration==title_column || is_pk>=1)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    else
+    {
+        qDebug() << ":(";
+        return false;
+    }
+
+}
 
 
 

@@ -17,12 +17,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     assemblydb.cpp \
     callmessagehs.cpp \
-    style_main.cpp
+    style_main.cpp \
+    MainPages.cpp
 
 HEADERS  += mainwindow.h \
     assemblydb.h \
     callmessagehs.h \
-    style_main.h
+    style_main.h \
+    MainPages.h
 
 FORMS    += mainwindow.ui
 
