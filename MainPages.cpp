@@ -1,7 +1,3 @@
-#include "mainwindow.h"
-#include "assemblydb.h"
-#include "callmessagehs.h"
-#include "style_main.h"
 #include "MainPages.h"
 
 MainPages::MainPages(QStackedWidget* stack_widget)
@@ -23,6 +19,27 @@ MainPages::~MainPages()
 {
 
 };
+
+void MainPages::ClearLayoutAndChildren(QWidget* page)
+{
+    // Удаляем layout, если есть
+    if (page->layout()) {
+        QLayoutItem* item;
+        while ((item = page->layout()->takeAt(0)) != nullptr) {
+            if (item->widget()) {
+                delete item->widget(); // удаляем виджет
+            }
+            delete item; // удаляем сам layout item
+        }
+        delete page->layout();
+    }
+
+    // Перестраховка: удаляем детей напрямую, если какие-то остались
+    QList<QWidget*> children = page->findChildren<QWidget*>();
+    for (QWidget* child : children) {
+        delete child;
+    }
+}
 
 //PAGE1: DataBase Conect
 void MainPages::Page1(QStackedWidget* stack_widget)
@@ -133,10 +150,10 @@ void MainPages::Page2(QStackedWidget* stack_widget)
 //PAGE2:: Go to the page3 and clear page3
 void MainPages::GoPage3(QStackedWidget* stack_widget, QPushButton* button_db)
 {
-    if(stack_widget->widget(2)->layout())
-    {
-        delete stack_widget->widget(2)->layout();
-    }
+    QWidget* page = stack_widget->widget(2);
+
+    ClearLayoutAndChildren(page);
+
     stack_widget->setCurrentIndex(2);
 
     Page3(stack_widget, button_db);
@@ -194,20 +211,19 @@ void MainPages::Page3(QStackedWidget* stack_widget, QPushButton* button_db)
     btn_create_element->setMinimumWidth(100);
     layout_page->addWidget(btn_create_element, 0, 3);
     QObject::connect(btn_create_element, &QPushButton::clicked, [=](){
-        CreateElement(stack_widget, name_table, columns_title);
+        CreateElement(stack_widget, button_db, columns_title);
     });
 
 
 }
 
-void MainPages::CreateElement(QStackedWidget* stack_widget, QString name_table, const QVector<QString>& columns_title)
+void MainPages::CreateElement(QStackedWidget* stack_widget, QPushButton* button_db, const QVector<QString>& columns_title)
 {
     QWidget* page_create = stack_widget->widget(3);
+    ClearLayoutAndChildren(page_create);
 
-    if(page_create->layout())
-    {
-        delete page_create->layout();
-    }
+    QString name_table=button_db->text();
+
     stack_widget->setCurrentIndex(3);
 
     page_create->setWindowTitle("AssemblyComputer");
@@ -215,32 +231,36 @@ void MainPages::CreateElement(QStackedWidget* stack_widget, QString name_table, 
     page_create->setMinimumWidth(window_MinimumWidth);
     QGridLayout* layout_page=new QGridLayout(page_create);
 
+    //Button "view tables"
+    QPushButton* btn_view_tables=new QPushButton(QString("view \"%1\"").arg(name_table), page_create);
+    QObject::connect(btn_view_tables, &QPushButton::clicked, [=](){
+        GoPage3(stack_widget, button_db);
+    });
+    layout_page->addWidget(btn_view_tables, 0, 0);
 
-    int size_colum_title = columns_title.length();
-    QVector<QLineEdit*> list_input_field;
+    // Get list Elements table
+    qDebug() << "columns title: " << columns_title;
+    QVector<QString> autoincrement_title = connect_db.GetAutoincrementElements(name_table);
+    qDebug() << "autoincrement columns title: " << autoincrement_title;
+    QVector<QString> clean_title = helper_func_HS.ExcludeListInList(columns_title, autoincrement_title);
+    qDebug() << "clean title: " << clean_title;
+
 
     //Input field
-    bool is_pk;
-    for(int i=0; i<size_colum_title; i++)
+    QVector<QLineEdit*> list_input_field;   // list QLineEdit()
+    for(QString title : clean_title)
     {
-        is_pk = connect_db.CheckAutoincrement(columns_title[i], name_table);
-        if(is_pk)
-        {
-            continue;
-        }
-        else
-        {
-            QLineEdit* input_field=new QLineEdit();
-            input_field->setPlaceholderText(columns_title[i]);
-            list_input_field.append(input_field);
-        }
+        QLineEdit* input_field=new QLineEdit();
+        input_field->setPlaceholderText(title);
+        list_input_field.append(input_field);
     }
+    int size_list_input_field = list_input_field.length();
 
-    for(int i=0; i<size_colum_title; i++)
+
+    for(int i=0; i<size_list_input_field; i++)
     {
-        layout_page->addWidget(list_input_field[i], i, 0);
+        layout_page->addWidget(list_input_field[i], i+1, 0, 1, 4);
     }
-
 }
 
 

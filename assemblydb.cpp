@@ -74,6 +74,7 @@ QVector<QString> AssemblyDB::GetColumnsTitle(const QString& name_table)
     return list_columns_title;
 }
 
+
 QVector<QVector<QString>> AssemblyDB::GetElementTable(QString& name_table, const QVector<QString>& list_column_title)
 {
     QVector<QVector<QString>> matrix_rows_table;
@@ -112,33 +113,32 @@ QVector<QVector<QString>> AssemblyDB::GetElementTable(QString& name_table, const
     return matrix_rows_table;
 }
 
-bool AssemblyDB::CheckAutoincrement(const QString& name_table, const QString& title_column)
+
+QVector<QString> AssemblyDB::GetAutoincrementElements(const QString& name_table)
 {
     QSqlQuery query(db_lite);
 
-    QString str_query = QString("PRAGMA table_info(%1);").arg(name_table);
+    QString str_query = QString("PRAGMA table_info(\"%1\");").arg(name_table);
     int is_pk;
-    QString title_column_iteration;
+    QVector<QString> list_autoincrement;
     if(query.exec(str_query))
     {
         while(query.next())
         {
-            qDebug() << "0_0";
             QString title_column_iteration = query.value(1).toString();  //name column
-            is_pk = query.value(5).toInt();  // check primary key
-            qDebug() << title_column_iteration << ";;;" << is_pk;
-            if(title_column_iteration==title_column || is_pk>=1)
+            is_pk = query.value(5).toInt();  // check primary key; if(is_pk>0) is_pk=PK;
+            if(is_pk>0)
             {
-                return true;
+                list_autoincrement.append(title_column_iteration);
             }
         }
 
-        return false;
+        return list_autoincrement;
     }
     else
     {
         qDebug() << ":(";
-        return false;
+        return {};
     }
 
 }

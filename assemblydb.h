@@ -21,7 +21,7 @@ public:
     QStringList GetTablesName() const;
     QVector<QString> GetColumnsTitle(const QString& name_table);
     QVector<QVector<QString>> GetElementTable(QString& name_table, const QVector<QString>& list_column_title);
-    bool CheckAutoincrement(const QString& name_table, const QString& title_column);
+    QVector<QString> GetAutoincrementElements(const QString& name_table);
 };
 
 #endif // ASSEMBLYDB_H

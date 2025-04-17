@@ -18,13 +18,15 @@ SOURCES += main.cpp\
     assemblydb.cpp \
     callmessagehs.cpp \
     style_main.cpp \
-    MainPages.cpp
+    MainPages.cpp \
+    HelperFuncHS.cpp
 
 HEADERS  += mainwindow.h \
     assemblydb.h \
     callmessagehs.h \
     style_main.h \
-    MainPages.h
+    MainPages.h \
+    HelperFuncHS.h
 
 FORMS    += mainwindow.ui
 
