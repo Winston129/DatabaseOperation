@@ -13,22 +13,33 @@ TEMPLATE = app
 
 CONFIG += c++11
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    assemblydb.cpp \
-    callmessagehs.cpp \
-    style_main.cpp \
-    MainPages.cpp \
-    HelperFuncHS.cpp
+INCLUDEPATH += \
+    include \
+    include/db \
+    include/utils \
+    include/style
 
-HEADERS  += mainwindow.h \
-    assemblydb.h \
-    callmessagehs.h \
-    style_main.h \
-    MainPages.h \
-    HelperFuncHS.h
 
-FORMS    += mainwindow.ui
+SOURCES += \
+    src/main.cpp \
+    src/mainwindow.cpp \
+    src/MainPages.cpp \
+    src/db/assemblydb.cpp \
+    src/utils/callmessagehs.cpp \
+    src/utils/HelperFuncHS.cpp \
+    src/style/style_main.cpp
+
+HEADERS  += \
+    include/mainwindow.h \
+    include/MainPages.h \
+    include/db/assemblydb.h \
+    include/utils/HelperFuncHS.h \
+    include/utils/callmessagehs.h \
+    include/style/style_main.h \
+    include/style/style_main.h
+
+FORMS    += \
+    ui/mainwindow.ui
 
 DISTFILES += \
-    AssemblyComputer.sqlite
+    database/AssemblyComputer.sqlite

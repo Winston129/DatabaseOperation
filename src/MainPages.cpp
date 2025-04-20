@@ -15,10 +15,8 @@ MainPages::MainPages(QStackedWidget* stack_widget)
 
     Page1(stack_widget);
 }
-MainPages::~MainPages()
-{
+MainPages::~MainPages(){};
 
-};
 
 void MainPages::ClearLayoutAndChildren(QWidget* page)
 {
@@ -41,7 +39,8 @@ void MainPages::ClearLayoutAndChildren(QWidget* page)
     }
 }
 
-//PAGE1: DataBase Conect
+
+//PAGE1: DataBase Connect
 void MainPages::Page1(QStackedWidget* stack_widget)
 {
     QWidget* page_1 = stack_widget->widget(0);
@@ -57,7 +56,6 @@ void MainPages::Page1(QStackedWidget* stack_widget)
     //Input field
     QLineEdit* input_field=new QLineEdit();
     input_field->setPlaceholderText("sub/path/db.sqlite");
-//    input_field->setMaxLength(30);
     //Button: DataBase Connect
     QPushButton* btn_connect=new QPushButton("Connect", page_1);
     QObject::connect(btn_connect, &QPushButton::clicked, [=](){
@@ -67,7 +65,7 @@ void MainPages::Page1(QStackedWidget* stack_widget)
     QPushButton* btn_go_page2=new QPushButton("Go to DataBase", page_1);
     QObject::connect(btn_go_page2, &QPushButton::clicked, [=](){
         GoPage2(stack_widget);
-        list_name_db=connect_db.GetTablesName();
+        list_name_db=connect_db.GetTableType("all");
         Page2(stack_widget);
     });
 
@@ -83,7 +81,11 @@ void MainPages::Page1(QStackedWidget* stack_widget)
     layout_page_1->addWidget(btn_go_page2, 3, 0);
 }
 
-//PAGE1:: Connect db
+
+/*
+* PAGE1
+? Connecting to the database and Creating a list of "intermediate tables"
+*/
 void MainPages::ConnectDB(const QString& path_db)
 {
     QString msg;
@@ -98,8 +100,13 @@ void MainPages::ConnectDB(const QString& path_db)
 
 }
 
-//PAGE1:: Go to the page2
-void MainPages::GoPage2(QStackedWidget* stack_widget){
+
+/*
+* PAGE1
+? Go to the page2
+*/
+void MainPages::GoPage2(QStackedWidget* stack_widget)
+{
     CallMessageHS call_message_HS;
     QString msg;
 
@@ -111,6 +118,7 @@ void MainPages::GoPage2(QStackedWidget* stack_widget){
         call_message_HS.CallMessage(msg);
     }
 }
+
 
 //PAGE2: Get Button all tables
 void MainPages::Page2(QStackedWidget* stack_widget)
@@ -141,11 +149,11 @@ void MainPages::Page2(QStackedWidget* stack_widget)
 
     for(QPushButton* button_db : list_button){
         QObject::connect(button_db, &QPushButton::clicked, [this, stack_widget, button_db](){
-//            GetRows(button_db);
             GoPage3(stack_widget, button_db);
         });
     }
 }
+
 
 //PAGE2:: Go to the page3 and clear page3
 void MainPages::GoPage3(QStackedWidget* stack_widget, QPushButton* button_db)
@@ -160,8 +168,7 @@ void MainPages::GoPage3(QStackedWidget* stack_widget, QPushButton* button_db)
 }
 
 //PAGE3: View Table
-void MainPages::Page3(QStackedWidget* stack_widget, QPushButton* button_db)
-{
+void MainPages::Page3(QStackedWidget* stack_widget, QPushButton* button_db){
     QWidget* page_3 = stack_widget->widget(2);
 
     page_3->setWindowTitle("AssemblyComputer");
@@ -174,7 +181,7 @@ void MainPages::Page3(QStackedWidget* stack_widget, QPushButton* button_db)
     btn_go_page2->setMinimumHeight(50);
     btn_go_page2->setMinimumWidth(100);
     layout_page->addWidget(btn_go_page2, 0, 0);
-    QObject::connect(btn_go_page2, &QPushButton::clicked, [=](){
+    QObject::connect(btn_go_page2, &QPushButton::clicked, [this, stack_widget](){
         GoPage2(stack_widget);
     });
 
@@ -210,15 +217,18 @@ void MainPages::Page3(QStackedWidget* stack_widget, QPushButton* button_db)
     btn_create_element->setMinimumHeight(50);
     btn_create_element->setMinimumWidth(100);
     layout_page->addWidget(btn_create_element, 0, 3);
-    QObject::connect(btn_create_element, &QPushButton::clicked, [=](){
-        CreateElement(stack_widget, button_db, columns_title);
+    QObject::connect(btn_create_element, &QPushButton::clicked, [this, stack_widget, button_db, columns_title](){
+        PageCreateElement(stack_widget, button_db, columns_title);
     });
 
 
 }
 
-void MainPages::CreateElement(QStackedWidget* stack_widget, QPushButton* button_db, const QVector<QString>& columns_title)
-{
+
+/*
+ * Page for creating an element in a table
+*/
+void MainPages::PageCreateElement(QStackedWidget* stack_widget, QPushButton* button_db, const QVector<QString>& columns_title){
     QWidget* page_create = stack_widget->widget(3);
     ClearLayoutAndChildren(page_create);
 
@@ -231,13 +241,20 @@ void MainPages::CreateElement(QStackedWidget* stack_widget, QPushButton* button_
     page_create->setMinimumWidth(window_MinimumWidth);
     QGridLayout* layout_page=new QGridLayout(page_create);
 
-    //Button "view tables"
+
+    /*============================*/
+    /*=== Button "view tables" ===*/
+    /*============================*/
     QPushButton* btn_view_tables=new QPushButton(QString("view \"%1\"").arg(name_table), page_create);
     QObject::connect(btn_view_tables, &QPushButton::clicked, [=](){
         GoPage3(stack_widget, button_db);
     });
     layout_page->addWidget(btn_view_tables, 0, 0);
 
+
+    /*===================*/
+    /*=== Input field ===*/
+    /*===================*/
     // Get list Elements table
     qDebug() << "columns title: " << columns_title;
     QVector<QString> autoincrement_title = connect_db.GetAutoincrementElements(name_table);
@@ -245,33 +262,37 @@ void MainPages::CreateElement(QStackedWidget* stack_widget, QPushButton* button_
     QVector<QString> clean_title = helper_func_HS.ExcludeListInList(columns_title, autoincrement_title);
     qDebug() << "clean title: " << clean_title;
 
-
-    //Input field
-    QVector<QLineEdit*> list_input_field;   // list QLineEdit()
+    QVector<QLineEdit*> input_fields;   // List Input Field
     for(QString title : clean_title)
     {
         QLineEdit* input_field=new QLineEdit();
         input_field->setPlaceholderText(title);
-        list_input_field.append(input_field);
+        input_fields.append(input_field);
     }
-    int size_list_input_field = list_input_field.length();
+    int size_input_fields = input_fields.length();
 
-
-    for(int i=0; i<size_list_input_field; i++)
+    for(int i=0; i<size_input_fields; i++)
     {
-        layout_page->addWidget(list_input_field[i], i+1, 0, 1, 4);
+        layout_page->addWidget(input_fields[i], i+1, 0, 1, 4);
     }
+
+
+    /*===============================*/
+    /*=== Button "Create element" ===*/
+    /*===============================*/
+    QPushButton* btn_create_element = new QPushButton("CREATE", page_create);
+    layout_page->addWidget(btn_create_element, size_input_fields+2, 0, 1, 4);
+    QObject::connect(btn_create_element, &QPushButton::clicked, [this, input_fields, name_table, columns_title](){
+        CreateElement(input_fields, name_table, columns_title);
+    });
 }
 
+void MainPages::CreateElement(QVector<QLineEdit*> input_fields, const QString& name_table, const QVector<QString>& columns_title){
+    QVector<QString> query_columns;
+    for(QLineEdit* input_field : input_fields)
+    {
+        query_columns.append(input_field->text());
+    }
 
-
-
-
-
-
-
-
-
-
-
-
+    // QueryCreateElement(query_columns, name_table, columns_title);
+}

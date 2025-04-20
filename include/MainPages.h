@@ -23,10 +23,10 @@
 class MainPages
 {
 private:
-    //CALL MASSEGER
-    CallMessageHS call_message_HS;
     //DATABASE
     AssemblyDB connect_db;
+    //CALL MASSEGER
+    CallMessageHS call_message_HS;
     //HELPER FUNTION
     HelperFuncHS helper_func_HS;
     // SIZE WINDOW
@@ -34,7 +34,7 @@ private:
     const int window_MinimumWidth=700;
     //
     bool open_connect=false;
-    QStringList list_name_db;
+    QVector<QString> list_name_db;
 
 public:
     MainPages(QStackedWidget* stack_widget);
@@ -47,7 +47,8 @@ public:
     void Page2(QStackedWidget* stack_widget);
     void GoPage3(QStackedWidget* stack_widget, QPushButton* button_db);
     void Page3(QStackedWidget* stack_widget, QPushButton* button_db);
-    void CreateElement(QStackedWidget* stack_widget, QPushButton* button_db, const QVector<QString>& columns_title);
+    void PageCreateElement(QStackedWidget* stack_widget, QPushButton* button_db, const QVector<QString>& columns_title);
+    void CreateElement(QVector<QLineEdit*> input_fields, const QString& name_table, const QVector<QString>& columns_title);
 };
 
 #endif // MAINPAGES_H
